@@ -4,38 +4,187 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PDF Handout Converter</title>
+  <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
-    :root { color-scheme: light; --ink:#0E0E0E; --paper:#F7F4EE; --spot:#C9352B; --muted:#5A5650; }
+    :root { color-scheme: light; --ink:#0E0E0E; --paper:#F7F4EE; --paper-2:#EFEAE0; --spot:#C9352B; --muted:#5A5650; --line:rgba(14,14,14,.14); }
     * { box-sizing: border-box; }
-    body { margin:0; font-family: system-ui, sans-serif; background:var(--paper); color:var(--ink); line-height:1.6; }
-    main { max-width: 760px; margin: 0 auto; padding: 64px 24px; }
-    h1 { font-size: 2.6rem; margin: 0 0 16px; letter-spacing:-0.02em; }
-    h1 em { color: var(--spot); font-style: italic; }
-    p { color: var(--muted); }
-    a { color: var(--ink); }
-    code { background:#EFEAE0; padding:2px 6px; border-radius:4px; }
-    .btn { display:inline-block; margin-top:16px; padding:12px 20px; background:var(--ink); color:var(--paper); text-decoration:none; border-radius:0; font-weight:600; }
-    .btn:hover { background:var(--spot); }
-    ul { padding-left: 20px; }
+    body { margin:0; font-family: system-ui, -apple-system, sans-serif; background:var(--paper); color:var(--ink); line-height:1.55; }
+    main { max-width: 980px; margin: 0 auto; padding: 48px 24px; }
+    h1 { font-size: clamp(2.4rem,6vw,4.2rem); margin:0 0 12px; letter-spacing:-.02em; }
+    h1 em { color:var(--spot); font-style:italic; }
+    p { color:var(--muted); max-width: 60ch; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:32px; margin-top:32px; }
+    @media (max-width:760px){ .grid{grid-template-columns:1fr;} }
+    .card { border:1px solid var(--ink); padding:20px; background:var(--paper-2); }
+    label { display:block; font-weight:600; margin:14px 0 6px; font-size:.9rem; text-transform:uppercase; letter-spacing:.04em; }
+    input[type=file], select { width:100%; padding:10px; border:1px solid var(--ink); background:var(--paper); }
+    .row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+    .row label { margin:0; text-transform:none; letter-spacing:0; font-weight:500; }
+    button { margin-top:20px; padding:14px 24px; background:var(--ink); color:var(--paper); border:2px solid var(--ink); font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:.04em; }
+    button:hover { background:var(--spot); border-color:var(--spot); }
+    button:disabled { opacity:.5; cursor:wait; }
+    #status { margin-top:16px; font-weight:600; }
+    .ok { color:var(--spot); }
+    .err { color:#9b1c1c; }
+    ul { color:var(--muted); }
+    code { background:#EFEAE0; padding:2px 6px; }
   </style>
 </head>
 <body>
   <main>
     <h1>PDF Handout <em>Converter</em></h1>
-    <p>가로(landscape) 프레젠테이션 PDF를 A4 세로 유인물 형식 PDF로 변환하는 Python 도구입니다.</p>
-    <a class="btn" href="https://github.com/WBmaker2/pdf-handout-converter">GitHub 저장소</a>
-    <h2>실행 방법</h2>
-    <pre><code>python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python app.py</code></pre>
-    <p>웹 UI: http://127.0.0.1:7860</p>
-    <h2>기능</h2>
-    <ul>
-      <li>2장 / 6장 배치 모드</li>
-      <li>여러 PDF 동시 변환, 개별 또는 ZIP 다운로드</li>
-      <li>벡터 보존 변환 (화질 손실 없음)</li>
-    </ul>
+    <p>가로 프레젠테이션 PDF를 A4 세로 유인물로 변환합니다. 모든 처리는 브라우저에서 이루어져 파일이 서버로 전송되지 않습니다.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h2>입력 &amp; 옵션</h2>
+        <label for="files">PDF 파일 (여러 개 선택 가능)</label>
+        <input id="files" type="file" multiple accept="application/pdf" />
+
+        <label for="mode">배치</label>
+        <select id="mode">
+          <option value="2">2장 (위/아래)</option>
+          <option value="6">6장 (2×3)</option>
+        </select>
+
+        <div class="row">
+          <label><input id="border" type="checkbox" checked /> 슬라이드 테두리</label>
+          <label><input id="numbers" type="checkbox" checked /> 원본 페이지 번호</label>
+        </div>
+
+        <label for="fmt">다운로드 방식</label>
+        <select id="fmt">
+          <option value="individual">개별 파일</option>
+          <option value="zip">ZIP 압축</option>
+        </select>
+
+        <button id="convert">변환하기</button>
+        <div id="status"></div>
+      </div>
+
+      <div class="card">
+        <h2>안내</h2>
+        <ul>
+          <li>여백 10mm, 간격 6mm 고정</li>
+          <li>마지막 페이지는 남은 슬라이드만 배치</li>
+          <li>벡터 보존 변환 (화질 손실 없음)</li>
+          <li>암호화된 PDF는 지원하지 않습니다</li>
+        </ul>
+        <p>Python 버전은 <a href="https://github.com/WBmaker2/pdf-handout-converter">GitHub 저장소</a>에서 확인할 수 있습니다.</p>
+      </div>
+    </div>
   </main>
+
+  <script>
+    const { PDFDocument, rgb } = PDFLib;
+    const A4_W = 595.28, A4_H = 841.89;
+    const GRIDS = { 2: [1, 2], 6: [2, 3] };
+
+    function mmToPt(mm) { return mm * 72 / 25.4; }
+
+    function downloadBlob(blob, name) {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    async function convertOne(file, n, border, numbers) {
+      const bytes = await file.arrayBuffer();
+      const src = await PDFDocument.load(bytes);
+      const out = await PDFDocument.create();
+      const [cols, rows] = GRIDS[n];
+      const margin = mmToPt(10);
+      const gutter = mmToPt(6);
+      const usableW = A4_W - 2 * margin;
+      const usableH = A4_H - 2 * margin;
+      const cellW = (usableW - (cols - 1) * gutter) / cols;
+      const cellH = (usableH - (rows - 1) * gutter) / rows;
+
+      const total = src.getPageCount();
+      if (total === 0) throw new Error('슬라이드가 없습니다');
+
+      for (let i = 0; i < total; i += n) {
+        const page = out.addPage([A4_W, A4_H]);
+        for (let idx = 0; idx < n && i + idx < total; idx++) {
+          const slideNo = i + idx;
+          const srcPage = src.getPage(slideNo);
+          const { width: sw, height: sh } = srcPage.getSize();
+          const r = Math.floor(idx / cols);
+          const c = idx % cols;
+          const x0 = margin + c * (cellW + gutter);
+          const y0Top = margin + r * (cellH + gutter);
+
+          let scale = Math.min(cellW / sw, cellH / sh);
+          if (!isFinite(scale) || scale <= 0) scale = 1;
+          const w = sw * scale;
+          const h = sh * scale;
+          const cx = x0 + (cellW - w) / 2;
+          const cyTop = y0Top + (cellH - h) / 2;
+
+          const embedded = await out.embedPage(srcPage);
+          const x = cx;
+          const y = A4_H - (cyTop + h);
+
+          page.drawPage(embedded, { x, y, width: w, height: h });
+
+          if (border) {
+            page.drawRectangle({ x, y, width: w, height: h, borderColor: rgb(0, 0, 0), borderWidth: 0.5 });
+          }
+          if (numbers) {
+            page.drawText(String(slideNo + 1), {
+              x: cx,
+              y: A4_H - (cyTop + h + 9),
+              size: 8,
+              color: rgb(0.35, 0.35, 0.35),
+            });
+          }
+        }
+      }
+
+      const outBytes = await out.save();
+      return new Blob([outBytes], { type: 'application/pdf' });
+    }
+
+    const status = document.getElementById('status');
+    document.getElementById('convert').addEventListener('click', async () => {
+      const files = Array.from(document.getElementById('files').files || []);
+      if (!files.length) { status.textContent = 'PDF 파일을 선택해주세요.'; status.className = 'err'; return; }
+      const n = parseInt(document.getElementById('mode').value, 10);
+      const border = document.getElementById('border').checked;
+      const numbers = document.getElementById('numbers').checked;
+      const fmt = document.getElementById('fmt').value;
+      const btn = document.getElementById('convert');
+      btn.disabled = true;
+      status.className = '';
+      try {
+        const outputs = [];
+        for (const file of files) {
+          status.textContent = `변환 중: ${file.name}`;
+          const blob = await convertOne(file, n, border, numbers);
+          const outName = file.name.replace(/\.pdf$/i, '') + '_handout.pdf';
+          outputs.push({ name: outName, blob });
+        }
+        if (fmt === 'zip') {
+          const zip = new JSZip();
+          outputs.forEach(o => zip.file(o.name, o.blob));
+          const zipBlob = await zip.generateAsync({ type: 'blob' });
+          downloadBlob(zipBlob, 'handout.zip');
+        } else {
+          for (const o of outputs) downloadBlob(o.blob, o.name);
+        }
+        status.textContent = '변환 완료';
+        status.className = 'ok';
+      } catch (e) {
+        console.error(e);
+        status.textContent = '오류: ' + (e && e.message ? e.message : e);
+        status.className = 'err';
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>

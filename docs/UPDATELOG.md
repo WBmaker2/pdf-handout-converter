@@ -10,3 +10,5 @@
 - DESIGN.md 및 .impeccable 디자인 토큰 추가
 
 - GitHub Pages 정적 안내 페이지 추가
+
+- 웹 브라우저에서 바로 실행되는 클라이언트 변환 페이지 추가 (GitHub Pages)
