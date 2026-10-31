@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PDF Handout Converter</title>
+  <style>
+    :root { color-scheme: light; --ink:#0E0E0E; --paper:#F7F4EE; --spot:#C9352B; --muted:#5A5650; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, sans-serif; background:var(--paper); color:var(--ink); line-height:1.6; }
+    main { max-width: 760px; margin: 0 auto; padding: 64px 24px; }
+    h1 { font-size: 2.6rem; margin: 0 0 16px; letter-spacing:-0.02em; }
+    h1 em { color: var(--spot); font-style: italic; }
+    p { color: var(--muted); }
+    a { color: var(--ink); }
+    code { background:#EFEAE0; padding:2px 6px; border-radius:4px; }
+    .btn { display:inline-block; margin-top:16px; padding:12px 20px; background:var(--ink); color:var(--paper); text-decoration:none; border-radius:0; font-weight:600; }
+    .btn:hover { background:var(--spot); }
+    ul { padding-left: 20px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>PDF Handout <em>Converter</em></h1>
+    <p>가로(landscape) 프레젠테이션 PDF를 A4 세로 유인물 형식 PDF로 변환하는 Python 도구입니다.</p>
+    <a class="btn" href="https://github.com/WBmaker2/pdf-handout-converter">GitHub 저장소</a>
+    <h2>실행 방법</h2>
+    <pre><code>python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python app.py</code></pre>
+    <p>웹 UI: http://127.0.0.1:7860</p>
+    <h2>기능</h2>
+    <ul>
+      <li>2장 / 6장 배치 모드</li>
+      <li>여러 PDF 동시 변환, 개별 또는 ZIP 다운로드</li>
+      <li>벡터 보존 변환 (화질 손실 없음)</li>
+    </ul>
+  </main>
+</body>
+</html>
