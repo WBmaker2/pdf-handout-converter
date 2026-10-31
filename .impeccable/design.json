@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T00:00:00Z",
+  "title": "Design System: PDF Handout Converter",
+  "extensions": {
+    "colorMeta": {
+      "paper": { "role": "neutral", "displayName": "Paper", "canonical": "#F7F4EE", "tonalRamp": ["#0E0E0E", "#2A2A2A", "#4A4A4A", "#6A6A6A", "#8A8A8A", "#AAAAAA", "#CCCCCC", "#EFEAE0"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "canonical": "#0E0E0E", "tonalRamp": ["#000000", "#0E0E0E", "#2A2A2A", "#4A4A4A", "#6A6A6A", "#8A8A8A", "#AAAAAA", "#CCCCCC"] },
+      "spot": { "role": "primary", "displayName": "Vermilion Spot", "canonical": "#C9352B", "tonalRamp": ["#4A0F0C", "#7A1B16", "#A9251F", "#C9352B", "#D95A52", "#E8837D", "#F2ADA8", "#FAD7D4"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Masthead title only." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles with drop cap." },
+      "body": { "displayName": "Body", "purpose": "Lede and notes." },
+      "label": { "displayName": "Label", "purpose": "Footer, button text." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.2,0,0,1)", "purpose": "Hover lift and color transitions." }
+    ],
+    "breakpoints": [
+      { "name": "md", "value": "768px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink ground, paper text, square corners, uppercase label.",
+      "html": "<button class=\"ds-btn-primary\">변환하기</button>",
+      "css": ".ds-btn-primary { background: #0E0E0E; color: #F7F4EE; border: 2px solid #0E0E0E; border-radius: 0; font-family: 'Manrope', system-ui, sans-serif; font-weight: 600; letter-spacing: 0.02em; text-transform: uppercase; padding: 14px 28px; transition: background 180ms ease, border-color 180ms ease, transform 180ms ease; } .ds-btn-primary:hover { background: #C9352B; border-color: #C9352B; transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 2px solid #C9352B; outline-offset: 2px; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Paper-2 ground, 1px ink border, square corners.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"파일 선택\" />",
+      "css": ".ds-input { background: #EFEAE0; color: #0E0E0E; border: 1px solid #0E0E0E; border-radius: 0; padding: 10px 14px; font-family: 'Manrope', system-ui, sans-serif; font-size: 1rem; } .ds-input:focus-visible { outline: 2px solid #C9352B; outline-offset: 2px; }"
+    },
+    {
+      "name": "Upload Zone",
+      "kind": "custom",
+      "refersTo": "upload-zone",
+      "description": "Dashed ink border dropzone.",
+      "html": "<div class=\"ds-upload\">PDF 파일을 끌어다 놓거나 클릭하여 선택</div>",
+      "css": ".ds-upload { background: #EFEAE0; color: #5A5650; border: 2px dashed #0E0E0E; border-radius: 0; padding: 24px; min-height: 140px; display: flex; align-items: center; justify-content: center; font-family: 'Manrope', system-ui, sans-serif; transition: border-color 180ms ease, background 180ms ease; } .ds-upload:hover { border-color: #C9352B; background: #FFFFFF; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Print Shop",
+    "overview": "A mid-century magazine identity for a local print tool: black ink on warm coated stock, one vermilion spot color, a serif masthead over a strict two-column grid, drop initials, and heavy rules. The interface refuses the default Gradio card stack and the generic hero-over-features template; every screen reads like a press sheet. Calm, precise, trustworthy.",
+    "keyCharacteristics": [
+      "Warm paper ground (#F7F4EE) with ink (#0E0E0E) text; one spot color (vermilion #C9352B) used sparingly.",
+      "Bodoni Moda serif for display and headlines; Manrope for UI and body.",
+      "Zero radius: all corners are square; rules (1px/3px) carry structure.",
+      "Two-column fold on desktop; single column on mobile.",
+      "Hidden silhouette mark revealed on hover (footer)."
+    ],
+    "rules": [
+      { "name": "The One Voice Rule", "body": "The vermilion spot appears on at most one element per viewport; its rarity is the point.", "section": "colors" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest; emphasis comes from rules and tonal steps, not shadows.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep corners square and rules heavy.",
+      "Do use vermilion on at most one element per viewport.",
+      "Do fold two columns to one on mobile.",
+      "Do keep the upload → convert → download flow visible without scrolling."
+    ],
+    "donts": [
+      "Don't use rounded corners or pill buttons.",
+      "Don't add shadows or glass.",
+      "Don't use an eyebrow/kicker above the masthead.",
+      "Don't let the convert action leave the first viewport."
+    ]
+  }
+}
