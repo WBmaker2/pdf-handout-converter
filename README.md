@@ -1,5 +1,7 @@
 # PDF Handout Converter
 
+웹에서 바로 사용: https://wbmaker2.github.io/pdf-handout-converter/
+
 가로(landscape) 프레젠테이션 PDF를 A4 세로(portrait) 유인물 형식 PDF로 변환합니다.
 
 ## 설치
