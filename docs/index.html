@@ -57,10 +57,17 @@
         <select id="fmt">
           <option value="individual">개별 파일</option>
           <option value="zip">ZIP 압축</option>
+          <option value="merge">하나로 합치기 (순서 지정)</option>
         </select>
 
         <button id="convert">변환하기</button>
         <div id="status"></div>
+
+        <div id="orderSection" style="display:none; margin-top:16px;">
+          <h3 style="margin:0 0 8px; font-size:1rem;">결과 순서 조정</h3>
+          <ul id="orderList" style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;"></ul>
+          <p class="note" style="margin-top:8px;">항목을 드래그해 순서를 바꾸세요. '하나로 합치기' 선택 시 이 순서로 합칩니다.</p>
+        </div>
       </div>
 
       <div class="card">
@@ -149,6 +156,48 @@
     }
 
     const status = document.getElementById('status');
+    const orderSection = document.getElementById('orderSection');
+    const orderList = document.getElementById('orderList');
+    let currentOutputs = [];
+    let dragIndex = null;
+
+    function renderOrderList() {
+      orderList.innerHTML = '';
+      currentOutputs.forEach((o, idx) => {
+        const li = document.createElement('li');
+        li.draggable = true;
+        li.textContent = (idx + 1) + '. ' + o.name;
+        li.style.cssText = 'padding:10px 12px; border:1px solid var(--ink); background:var(--paper-2); cursor:grab; user-select:none;';
+        li.addEventListener('dragstart', (e) => { dragIndex = idx; e.dataTransfer.effectAllowed = 'move'; });
+        li.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; li.style.borderColor = 'var(--spot)'; });
+        li.addEventListener('dragleave', () => { li.style.borderColor = 'var(--ink)'; });
+        li.addEventListener('drop', (e) => {
+          e.preventDefault();
+          li.style.borderColor = 'var(--ink)';
+          if (dragIndex === null || dragIndex === idx) return;
+          const item = currentOutputs.splice(dragIndex, 1)[0];
+          currentOutputs.splice(idx, 0, item);
+          dragIndex = null;
+          renderOrderList();
+        });
+        li.addEventListener('dragend', () => { dragIndex = null; li.style.borderColor = 'var(--ink)'; });
+        orderList.appendChild(li);
+      });
+      orderSection.style.display = currentOutputs.length ? 'block' : 'none';
+    }
+
+    async function mergeOutputs(outputs) {
+      const merged = await PDFDocument.create();
+      for (const o of outputs) {
+        const bytes = await o.blob.arrayBuffer();
+        const src = await PDFDocument.load(bytes);
+        const pages = await merged.copyPages(src, src.getPageIndices());
+        pages.forEach((p) => merged.addPage(p));
+      }
+      const mergedBytes = await merged.save();
+      return new Blob([mergedBytes], { type: 'application/pdf' });
+    }
+
     document.getElementById('convert').addEventListener('click', async () => {
       const files = Array.from(document.getElementById('files').files || []);
       if (!files.length) { status.textContent = 'PDF 파일을 선택해주세요.'; status.className = 'err'; return; }
@@ -160,20 +209,25 @@
       btn.disabled = true;
       status.className = '';
       try {
-        const outputs = [];
+        currentOutputs = [];
         for (const file of files) {
           status.textContent = `변환 중: ${file.name}`;
           const blob = await convertOne(file, n, border, numbers);
           const outName = file.name.replace(/\.pdf$/i, '') + '_handout.pdf';
-          outputs.push({ name: outName, blob });
+          currentOutputs.push({ name: outName, blob });
         }
+        renderOrderList();
         if (fmt === 'zip') {
           const zip = new JSZip();
-          outputs.forEach(o => zip.file(o.name, o.blob));
+          currentOutputs.forEach(o => zip.file(o.name, o.blob));
           const zipBlob = await zip.generateAsync({ type: 'blob' });
           downloadBlob(zipBlob, 'handout.zip');
+        } else if (fmt === 'merge') {
+          status.textContent = 'PDF 합치는 중...';
+          const mergedBlob = await mergeOutputs(currentOutputs);
+          downloadBlob(mergedBlob, 'handout_merged.pdf');
         } else {
-          for (const o of outputs) downloadBlob(o.blob, o.name);
+          for (const o of currentOutputs) downloadBlob(o.blob, o.name);
         }
         status.textContent = '변환 완료';
         status.className = 'ok';
