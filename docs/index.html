@@ -39,8 +39,10 @@
     <div class="grid">
       <div class="card">
         <h2>입력 &amp; 옵션</h2>
-        <label for="files">PDF 파일 (여러 개 선택 가능)</label>
+        <label for="files">PDF 파일 (여러 번 추가 가능)</label>
         <input id="files" type="file" multiple accept="application/pdf" />
+        <ul id="fileList" style="list-style:none; padding:0; margin:12px 0 0; display:flex; flex-direction:column; gap:8px;"></ul>
+        <button type="button" id="clearFiles" style="margin-top:8px; padding:8px 12px; background:transparent; color:var(--ink); border:1px solid var(--ink); cursor:pointer;">목록 비우기</button>
 
         <label for="mode">배치</label>
         <select id="mode">
@@ -158,8 +160,60 @@
     const status = document.getElementById('status');
     const orderSection = document.getElementById('orderSection');
     const orderList = document.getElementById('orderList');
+    let selectedFiles = [];
     let currentOutputs = [];
     let dragIndex = null;
+    const fileList = document.getElementById('fileList');
+    const fileInput = document.getElementById('files');
+
+    function renderFileList() {
+      fileList.innerHTML = '';
+      selectedFiles.forEach((f, idx) => {
+        const li = document.createElement('li');
+        li.draggable = true;
+        li.style.cssText = 'display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; border:1px solid var(--ink); background:var(--paper-2); cursor:grab; user-select:none;';
+        const name = document.createElement('span');
+        name.textContent = (idx + 1) + '. ' + f.name;
+        li.appendChild(name);
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.textContent = '삭제';
+        removeBtn.style.cssText = 'padding:4px 8px; background:transparent; color:var(--ink); border:1px solid var(--ink); cursor:pointer;';
+        removeBtn.addEventListener('click', (e) => { e.stopPropagation(); selectedFiles.splice(idx, 1); renderFileList(); });
+        li.appendChild(removeBtn);
+
+        li.addEventListener('dragstart', (e) => { dragIndex = idx; e.dataTransfer.effectAllowed = 'move'; });
+        li.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; li.style.borderColor = 'var(--spot)'; });
+        li.addEventListener('dragleave', () => { li.style.borderColor = 'var(--ink)'; });
+        li.addEventListener('drop', (e) => {
+          e.preventDefault();
+          li.style.borderColor = 'var(--ink)';
+          if (dragIndex === null || dragIndex === idx) return;
+          const item = selectedFiles.splice(dragIndex, 1)[0];
+          selectedFiles.splice(idx, 0, item);
+          dragIndex = null;
+          renderFileList();
+        });
+        li.addEventListener('dragend', () => { dragIndex = null; li.style.borderColor = 'var(--ink)'; });
+        fileList.appendChild(li);
+      });
+    }
+
+    fileInput.addEventListener('change', () => {
+      const newFiles = Array.from(fileInput.files || []);
+      for (const f of newFiles) {
+        if (!selectedFiles.some((existing) => existing.name === f.name && existing.size === f.size && existing.lastModified === f.lastModified)) {
+          selectedFiles.push(f);
+        }
+      }
+      fileInput.value = '';
+      renderFileList();
+    });
+
+    document.getElementById('clearFiles').addEventListener('click', () => {
+      selectedFiles = [];
+      renderFileList();
+    });
 
     function renderOrderList() {
       orderList.innerHTML = '';
@@ -199,8 +253,8 @@
     }
 
     document.getElementById('convert').addEventListener('click', async () => {
-      const files = Array.from(document.getElementById('files').files || []);
-      if (!files.length) { status.textContent = 'PDF 파일을 선택해주세요.'; status.className = 'err'; return; }
+      const files = selectedFiles.slice();
+      if (!files.length) { status.textContent = 'PDF 파일을 추가해주세요.'; status.className = 'err'; return; }
       const n = parseInt(document.getElementById('mode').value, 10);
       const border = document.getElementById('border').checked;
       const numbers = document.getElementById('numbers').checked;
