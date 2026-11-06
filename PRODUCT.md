@@ -12,7 +12,7 @@ Primary users are instructors and teachers preparing printed handouts from prese
 
 ## Product Purpose
 
-Convert landscape presentation PDFs into A4 portrait handout PDFs (2 or 6 slides per page), preserving vector quality, with optional borders and original page numbers. Success means a fast, local, lossless conversion that instructors can run without internet access.
+Convert landscape presentation PDFs into A4 portrait handout PDFs (2, 6 or 8 slides per page), preserving vector quality, with optional borders and original page numbers. Success means a fast, local, lossless conversion that instructors can run without internet access.
 
 ## Positioning
 
@@ -20,11 +20,11 @@ Unlike rasterizing or screenshot-based converters, this tool places source pages
 
 ## Operating Context
 
-Runs locally via a Gradio web UI (http://127.0.0.1:7860) or as a Python library/CLI; no network dependency for conversion. Users upload one or more PDFs, choose layout (2 or 6 per page), toggle borders and page numbers, and download results.
+Runs locally via a Gradio web UI (http://127.0.0.1:7860) or as a Python library/CLI; no network dependency for conversion. Users upload one or more PDFs, choose layout (2, 6 or 8 per page), toggle borders and page numbers, and download results.
 
 ## Capabilities and Constraints
 
-- n_per_page: 2 or 6
+- n_per_page: 2, 6 or 8
 - margin_mm, gutter_mm configurable in code
 - border and show_numbers toggles
 - Handles empty PDFs, single slide, encrypted PDFs, portrait input, large documents

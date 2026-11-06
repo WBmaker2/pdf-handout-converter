@@ -32,7 +32,15 @@ def run(files, mode, border, numbers, fmt):
     if not files:
         raise gr.Error("PDF 파일을 업로드해주세요.")
 
-    n = 2 if str(mode).startswith("2") else 6
+    mode_str = str(mode)
+    if mode_str.startswith("2"):
+        n = 2
+    elif mode_str.startswith("6"):
+        n = 6
+    elif mode_str.startswith("8"):
+        n = 8
+    else:
+        n = 6
     out_dir = os.path.join(tempfile.gettempdir(), f"handout_{uuid.uuid4().hex}")
     os.makedirs(out_dir, exist_ok=True)
 
@@ -290,7 +298,7 @@ with gr.Blocks(title="PDF Handout Converter") as demo:
                 file_types=[".pdf"],
             )
             mode = gr.Radio(
-                ["2장 (위/아래)", "6장 (2×3)"],
+                ["2장 (위/아래)", "6장 (2×3)", "8장 (2×4)"],
                 value="6장 (2×3)",
                 label="배치",
             )

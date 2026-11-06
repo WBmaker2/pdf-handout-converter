@@ -48,6 +48,7 @@
         <select id="mode">
           <option value="2">2장 (위/아래)</option>
           <option value="6" selected>6장 (2×3)</option>
+          <option value="8">8장 (2×4)</option>
         </select>
 
         <div class="row">
@@ -88,7 +89,7 @@
   <script>
     const { PDFDocument, rgb } = PDFLib;
     const A4_W = 595.28, A4_H = 841.89;
-    const GRIDS = { 2: [1, 2], 6: [2, 3] };
+    const GRIDS = { 2: [1, 2], 6: [2, 3], 8: [2, 4] };
 
     function mmToPt(mm) { return mm * 72 / 25.4; }
 

@@ -8,7 +8,7 @@ import fitz
 logger = logging.getLogger(__name__)
 
 A4_W, A4_H = 595.28, 841.89
-GRIDS = {2: (1, 2), 6: (2, 3)}
+GRIDS = {2: (1, 2), 6: (2, 3), 8: (2, 4)}
 
 
 class ConversionError(Exception):
@@ -41,7 +41,7 @@ def convert(
 ):
     input_path = _page_path(input_path)
     if n_per_page not in GRIDS:
-        raise ValueError(f"지원하지 않는 모드입니다: {n_per_page} (2 또는 6)")
+        raise ValueError(f"지원하지 않는 모드입니다: {n_per_page} (2, 6 또는 8)")
 
     src = fitz.open(input_path)
     out = None

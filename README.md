@@ -30,7 +30,7 @@ convert("in.pdf", "out.pdf", n_per_page=6)
 
 ## 옵션
 
-- `n_per_page`: 2 또는 6
+- `n_per_page`: 2, 6 또는 8
 - `margin_mm`, `gutter_mm`: 여백/간격(mm)
 - `border`: 슬라이드 테두리
 - `show_numbers`: 원본 페이지 번호 표시
