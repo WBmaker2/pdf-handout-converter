@@ -299,7 +299,7 @@ with gr.Blocks(title="PDF Handout Converter") as demo:
             )
             mode = gr.Radio(
                 ["2장 (위/아래)", "6장 (2×3)", "8장 (2×4)"],
-                value="6장 (2×3)",
+                value="8장 (2×4)",
                 label="배치",
             )
             with gr.Row():
